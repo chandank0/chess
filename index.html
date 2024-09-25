@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game</title>
+    <!-- Chessboard CSS for styling -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .chessboard {
+            width: 400px;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="board" class="chessboard"></div>
+
+    <!-- Include Chess.js and Chessboard.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.js"></script>
+
+    <script>
+        // Initialize the chess game logic
+        let game = new Chess();
+
+        // Chessboard.js configuration
+        const config = {
+            draggable: true,
+            position: 'start',
+            onDragStart: onDragStart,
+            onDrop: onDrop,
+            onSnapEnd: onSnapEnd
+        };
+
+        // Initialize the chessboard
+        const board = Chessboard('board', config);
+
+        // Only allow moves if it's the player's turn
+        function onDragStart(source, piece, position, orientation) {
+            if (game.game_over()) return false;
+
+            // Prevent illegal piece movement
+            if (game.turn() === 'w' && piece.search(/^b/) !== -1) return false;
+            if (game.turn() === 'b' && piece.search(/^w/) !== -1) return false;
+        }
+
+        // Handle the move logic
+        function onDrop(source, target) {
+            // Attempt to make a move in the game
+            const move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // Automatically promote to queen for simplicity
+            });
+
+            // If the move is illegal, snap the piece back to the starting square
+            if (move === null) return 'snapback';
+
+            // Check if the game is over
+            updateGameStatus();
+        }
+
+        // Update the board position after the piece snap
+        function onSnapEnd() {
+            board.position(game.fen());
+        }
+
+        // Update game status (check, checkmate, draw)
+        function updateGameStatus() {
+            if (game.in_checkmate()) {
+                alert('Game Over! Checkmate!');
+            } else if (game.in_draw()) {
+                alert('Game Over! Draw!');
+            } else if (game.in_check()) {
+                alert('Check!');
+            }
+        }
+    </script>
+
+</body>
+</html>
